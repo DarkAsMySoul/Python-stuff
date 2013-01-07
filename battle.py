@@ -4,15 +4,14 @@
 # Description: My attempt to create a simple text-based, rpg-esque battle processing system.
 
 import sys
-import time
 
 # initialise global variables
 encounter_no = 1
-monster_type = ""
 
+# player related variables
 player_level = 1
 player_health = 1000
-player_strength = 32
+player_strength = 30
 player_vitality = 1000
 player_gold = 0
 player_exp = 0
@@ -24,6 +23,8 @@ small_potions = 0
 potions = 0
 large_potions = 0
 
+# enemy related variables
+monster_type = ""
 monster_health = 0
 monster_vitality = 0
 enemy_strength = 0
@@ -118,7 +119,6 @@ def determine_monster():
 	# for displaying the enemy's max health
 	monster_vitality = monster_health
 		
-	# display to the player what the enemy is
 	print "\n+--------------------+"
 	print "| Enemy encounter: %s |" % encounter_no
 	print "+--------------------+\n"
@@ -127,7 +127,7 @@ def determine_monster():
 	menu_msg()
 	
 def menu_msg():
-	# show player stats and ask the player what to do
+	# game menu
 	print """
 +---------------------------------------------------------------------------------+
 | Menu
@@ -357,26 +357,24 @@ def game_over():
 	print ""
 	
 	if temp_in == 1:
-		# reinitialise global variables
+		# initialise global variables
 		encounter_no = 1
-		monster_type = ""
 
-		monster_health = 0
+		# player related variables
+		player_level = 1
 		player_health = 1000
+		player_strength = 30
+		player_vitality = 1000
+		player_gold = 0
+		player_exp = 0
+		total_player_exp = 0
 
-		player_strength = 50
+		level_target = 50
 
-		enemy_strength = 0
-		enemy_atk_limit = 0
+		small_potions = 0
+		potions = 0
+		large_potions = 0
 
-		atk_chance = 0
-		atk_range = 0
-
-		enemy_chance = 0
-		enemy_range = 0
-
-		is_defending = False
-		
 		determine_monster()
 	elif temp_in != 1:
 		# exit game
