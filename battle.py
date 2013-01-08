@@ -1,5 +1,7 @@
 # Author: Christopher Reid
-# Date: 06/01/2013
+#
+# Date: Original: 06/01/2013
+#       Latest: 08/01/2013
 #
 # Description: My attempt to create a simple text-based, rpg-esque battle processing system.
 
@@ -60,57 +62,71 @@ def determine_monster():
 		monster_health = 1500
 		enemy_strength = 250
 		enemy_atk_limit = 250
+		
 	elif (rand_no >= (976 - player_level)) and (rand_no < 994):
 		if encounter_no < 18:
 			determine_monster()
+			
 		monster_type = "Wyvern"
 		monster_health = 1000
 		enemy_strength = 140
 		enemy_atk_limit = 60
+		
 	elif (rand_no >= 750) and (rand_no < (975 - player_level)):
 		monster_type = "Rat"
 		monster_health = 150
 		enemy_strength = 20
 		enemy_atk_limit = 50
+		
 	elif (rand_no >=525) and (rand_no < 749):
 		monster_type = "Goblin"
 		monster_health = 350
 		enemy_strength = 30
 		enemy_atk_limit = 40
+		
 	elif (rand_no >= (501 - player_level)) and (rand_no < 524):
 		if encounter_no < 14:
 			determine_monster()
+			
 		monster_type = "Wraith"
 		monster_health = 750
 		enemy_strength = 40
 		enemy_atk_limit = 100
+		
 	elif (rand_no >= 275) and (rand_no < (500 - player_level)):
 		monster_type = "Bandit"
 		monster_health = 250
 		enemy_strength = 40
 		enemy_atk_limit = 30
+		
 	elif (rand_no >= 250) and (rand_no < 274):
 		if encounter_no < 14:
 			determine_monster()
+			
 		monster_type = "Centaur"
 		monster_health = 850
 		enemy_strength = 100
 		enemy_atk_limit = 40
+		
 	elif (rand_no >= (24 + player_level)) and (rand_no < 249):
 		monster_type = "Skeleton"
 		monster_health = 300
 		enemy_strength = 50
 		enemy_atk_limit = 20
+		
 	elif (rand_no >= 5) and (rand_no < (23 + player_level)):
 		if encounter_no < 18:
 			determine_monster()
+			
 		monster_type = "Lich"
 		monster_health = 950
 		enemy_strength = 60
 		enemy_atk_limit = 140
+		
 	else:
 		if encounter_no < 30:
 			determine_monster()
+			
 		monster_type = "Cerberus"
 		monster_health = 2000
 		enemy_strength = 150
@@ -146,27 +162,30 @@ def menu_msg():
 def game_logic():
 	global is_defending
 	
-	input = int( raw_input('  -> '))
-	print ""
+	try:
+		input = int( raw_input('  -> '))
+		print ""
 	
-	if input == 1:
-		print "You attack the %s!\n" % monster_type
-		# goto attack logic
-		attack_logic()
-	elif input == 2:
-		print "You hold your ground and brace for an attack.\n"
-		# set defend to true
-		is_defending = True
-		# goto enemy turn
-		enemy_turn()
-	elif input == 3:
-		# goto item and inventory handling
-		inventory()
-	# handles invalid input
-	elif (input < 1) or (input > 3):
-		game_logic()
-	else:
-		game_logic()
+		if input == 1:
+			print "You attack the %s!\n" % monster_type
+			# goto attack logic
+			attack_logic()
+		elif input == 2:
+			print "You hold your ground and brace for an attack.\n"
+			# set defend to true
+			is_defending = True
+			# goto enemy turn
+			enemy_turn()
+		elif input == 3:
+			# goto item and inventory handling
+			inventory()
+		# handles invalid input
+		elif (input < 1) or (input > 3):
+			game_logic()
+		else:
+			game_logic()
+	except Exception, e:#  RuntimeError: maximum recursion depth exceeded while calling a Python object:
+		print "Encountered an error: " + str(e)
 	
 def attack_logic():
 	global monster_health, encounter_no, atk_range, atk_chance, find_chance, player_level, player_exp, total_player_exp, player_strength, player_vitality, player_health, player_gold, level_target, dmg_received, small_potions, potions, large_potions	
@@ -254,6 +273,7 @@ def enemy_turn():
 		print "You received %s points of damage!\n" % enemy_dmg
 		player_health -= enemy_dmg
 		dmg_received += enemy_dmg
+		
 		if player_health <= 0:
 			print "You were defeated!\n"
 			game_over()
@@ -274,116 +294,139 @@ Inventory - Press 1, 2 or 3 to use, 4, 5 or 6 to buy, 7 to return
   3/6 -> %s large potions  << 500 gold >>  << +700HP >>
 	""" % (small_potions, potions, large_potions)
 	
-	inv_input = int( raw_input('  -> '))
-	print ""
-	
-	if inv_input == 1:
-		if small_potions >= 1:
-			print "You drank a small potion, and recovered 100HP.\n"
-			player_health += 100
-			small_potions -= 1
-			if player_health > player_vitality:
-				player_health = player_vitality
-				enemy_turn()
-			else:
-				enemy_turn()
-		elif small_potions == 0:
-			print "You don't have any small potions to use.\n"
-			inventory()
-	if inv_input == 2:
-		if potions >= 1:
-			print "You drank a potion, and recovered 300HP.\n"
-			player_health += 300
-			potions -= 1
-			if player_health > player_vitality:
-				player_health = player_vitality
-				enemy_turn()
-			else:
-				enemy_turn()
-		elif potions == 0:
-			print "You don't have any potions to use.\n"
-			inventory()
-	if inv_input == 3:
-		if large_potions >= 1:
-			print "You drank a large potion, and recovered 700HP.\n"
-			player_health += 700
-			large_potions -= 1
-			if player_health > player_vitality:
-				player_health = player_vitality
-				enemy_turn()
-			else:
-				enemy_turn()
-		elif large_potions == 0:
-			print "You don't have any large potions to use.\n"
-			inventory()
-	if inv_input == 4:
-		if player_gold >= 100:
-			print "You bought a small potion.\n"
-			small_potions += 1
-			player_gold -= 100
-			inventory()
-		elif player_gold < 100:
-			print "You don't have enough gold.\n"
-			inventory()
-	if inv_input == 5:
-		if player_gold >= 250:
-			print "You bought a potion.\n"
-			potions += 1
-			player_gold -= 250
-			inventory()
-		elif player_gold < 250:
-			print "You don't have enough gold.\n"
-			inventory()
-	if inv_input == 6:
-		if player_gold >= 500:
-			print "You bought a large potion.\n"
-			large_potions += 1
-			player_gold -= 500
-			inventory()
-		elif player_gold < 500:
-			print "You don't have enough gold.\n"
-			inventory()
-	if inv_input == 7:
-		menu_msg()
+	try:
+		inv_input = int( raw_input('  -> '))
+		print ""
 		
+		if inv_input == 1:
+			if small_potions >= 1:
+				print "You drank a small potion, and recovered 100HP.\n"
+				player_health += 100
+				small_potions -= 1
+				
+				if player_health > player_vitality:
+					player_health = player_vitality
+					enemy_turn()
+				else:
+					enemy_turn()
+					
+			elif small_potions == 0:
+				print "You don't have any small potions to use.\n"
+				inventory()
+				
+		if inv_input == 2:
+			if potions >= 1:
+				print "You drank a potion, and recovered 300HP.\n"
+				player_health += 300
+				potions -= 1
+				
+				if player_health > player_vitality:
+					player_health = player_vitality
+					enemy_turn()
+				else:
+					enemy_turn()
+					
+			elif potions == 0:
+				print "You don't have any potions to use.\n"
+				inventory()
+				
+		if inv_input == 3:
+			if large_potions >= 1:
+				print "You drank a large potion, and recovered 700HP.\n"
+				player_health += 700
+				large_potions -= 1
+				
+				if player_health > player_vitality:
+					player_health = player_vitality
+					enemy_turn()
+				else:
+					enemy_turn()
+			elif large_potions == 0:
+				print "You don't have any large potions to use.\n"
+				inventory()
+				
+		if inv_input == 4:
+			if player_gold >= 100:
+				print "You bought a small potion.\n"
+				small_potions += 1
+				player_gold -= 100
+				inventory()
+				
+			elif player_gold < 100:
+				print "You don't have enough gold.\n"
+				inventory()
+				
+		if inv_input == 5:
+			if player_gold >= 250:
+				print "You bought a potion.\n"
+				potions += 1
+				player_gold -= 250
+				inventory()
+				
+			elif player_gold < 250:
+				print "You don't have enough gold.\n"
+				inventory()
+				
+		if inv_input == 6:
+			if player_gold >= 500:
+				print "You bought a large potion.\n"
+				large_potions += 1
+				player_gold -= 500
+				inventory()
+				
+			elif player_gold < 500:
+				print "You don't have enough gold.\n"
+				inventory()
+				
+		if inv_input == 7:
+			menu_msg()
+			
+	except Exception, e:
+		print "Encountered an error: " + str(e)	
+	
 	enemy_turn()
 
 def game_over():
 	global encounter_no, player_health, is_defending
 
 	print "\n\nGAME OVER\n\nMonsters fought -> %s\n\nStart again?\n1\t-> Yes\nAny no. -> No\n" % encounter_no
-	
-	temp_in = int( raw_input('  -> '))
-	print ""
-	
-	if temp_in == 1:
-		# initialise global variables
-		encounter_no = 1
 
-		# player related variables
-		player_level = 1
-		player_health = 1000
-		player_strength = 30
-		player_vitality = 1000
-		player_gold = 0
-		player_exp = 0
-		total_player_exp = 0
+	try:
+		temp_in = int( raw_input('  -> '))
+		print ""
 
-		level_target = 50
+		if temp_in == 1:
+			# initialise global variables
+			encounter_no = 1
 
-		small_potions = 0
-		potions = 0
-		large_potions = 0
+			# player related variables
+			player_level = 1
+			player_health = 1000
+			player_strength = 30
+			player_vitality = 1000
+			player_gold = 0
+			player_exp = 0
+			total_player_exp = 0
 
-		determine_monster()
-	elif temp_in != 1:
-		# exit game
-		sys.exit()
+			level_target = 50
+
+			small_potions = 0
+			potions = 0
+			large_potions = 0
+
+			determine_monster()
+			
+		elif temp_in != 1:
+			# exit game
+			sys.exit()
+			
+	except Exception, e:
+		print "Encountered an error: " + str(e)
 	
 def start():
 	print """
 +-----------------------+
-|   ARENA               |
+|   ARENA v1.2          |
 |   by                  |
 |   Christopher Reid    |
 +-----------------------+
@@ -403,11 +446,15 @@ Enter 1 to continue.
 Any other number to quit.
 	"""
 	
-	t_in = int( raw_input('  -> '))
-	
-	if t_in == 1:
-		determine_monster()
-	elif t_in != 1:
-		sys.exit()
+	try:
+		t_in = int( raw_input('  -> '))
+		
+		if t_in == 1:
+			determine_monster()
+		elif t_in != 1:
+			sys.exit()
+			
+	except Exception, e:
+		print "Encountered an error: " + str(e)
 		
 start()
