@@ -3,9 +3,12 @@
 # Date: Original: 06/01/2013
 #       Latest: 08/01/2013
 #
+# Name: Battle Processing Test v1.3
+#
 # Description: My attempt to create a simple text-based, rpg-esque battle processing system.
 
 import sys
+import random
 
 # initialise global variables
 encounter_no = 1
@@ -32,14 +35,6 @@ monster_vitality = 0
 enemy_strength = 0
 enemy_atk_limit = 0
 
-atk_chance = 0
-atk_range = 0
-
-enemy_chance = 0
-enemy_range = 0
-
-find_chance = 0
-
 dmg_received = 0
 
 is_defending = False
@@ -50,8 +45,8 @@ def determine_monster():
 	
 	dmg_received = 0
 	
-	from random import randint
-	rand_no = randint(0, 1000)
+	rand_no = 0
+	rand_no = random.randrange(0, 1000, 2)
 	
 	if rand_no >= 995:
 		# make sure a low level player doesn't encounter high level monsters
@@ -134,25 +129,27 @@ def determine_monster():
 		
 	# for displaying the enemy's max health
 	monster_vitality = monster_health
-		
-	print "\n+--------------------+"
-	print "| Enemy encounter: %s |" % encounter_no
-	print "+--------------------+\n"
-	print "A %s appears before you." % monster_type, "\n"
+	
+	print """
+\n+---------------------+
+  Enemy encounter: %s
++---------------------+\n
+A %s appears before you.
+
+	""" % (encounter_no, monster_type)
 	
 	menu_msg()
 	
 def menu_msg():
 	# game menu
-	print """
+	print """+---------------------------------------------------------------------------------+
+  Menu
 +---------------------------------------------------------------------------------+
-| Menu
-+---------------------------------------------------------------------------------+
-| 1 -> Attack   2 -> Defend   3 -> Item  \t<< Player health -> %s/%s >>
-|                                        \t<< %s's health -> %s/%s >>
-|
-| << To next level -> %s >>  << Level -> %s >>
-| << Total Exp -> %s >>  << Gold -> %s >>  << Strength -> %s >>
+  1 -> Attack   2 -> Defend   3 -> Item  \t<< Player health -> %s/%s >>
+                                         \t<< %s's health -> %s/%s >>
+ 
+  << To next level -> %s >>  << Level -> %s >>
+  << Total Exp -> %s >>  << Gold -> %s >>  << Strength -> %s >>
 +---------------------------------------------------------------------------------+
 	""" % (player_health, player_vitality, monster_type, monster_health, monster_vitality, (level_target - player_exp), 
 	player_level, total_player_exp, player_gold, player_strength)
@@ -180,22 +177,26 @@ def game_logic():
 			# goto item and inventory handling
 			inventory()
 		# handles invalid input
-		elif (input < 1) or (input > 3):
-			game_logic()
 		else:
 			game_logic()
-	except Exception, e:#  RuntimeError: maximum recursion depth exceeded while calling a Python object:
-		print "Encountered an error: " + str(e)
-	
+		
+	except Exception:
+		# print "Encountered an error: " + str(e) - debugging
+		game_logic()
+		
 def attack_logic():
-	global monster_health, encounter_no, atk_range, atk_chance, find_chance, player_level, player_exp, total_player_exp, player_strength, player_vitality, player_health, player_gold, level_target, dmg_received, small_potions, potions, large_potions	
+	global monster_health, encounter_no, player_level, player_exp, total_player_exp, player_strength, player_vitality, player_health, player_gold, level_target, dmg_received, small_potions, potions, large_potions	
 	# determine damage variance and attack chance
-	from random import randint
-	atk_range = randint(0, 200)
-	atk_chance = randint(0, 10)
+	atk_range = 0
+	atk_chance = 0
+	
+	atk_range = random.randrange(0, 200, 2)
+	atk_chance = random.randrange(0, 10, 2)
 	
 	# determines the chance of finding item drops
-	find_chance = randint(0, 100)
+	find_chance = 0
+	
+	find_chance = random.randrange(0, 100, 2)
 	
 	drop = 0
 	
@@ -207,6 +208,7 @@ def attack_logic():
 		drop = 3
 				
 	# calculate player damage based on player strength and variance
+	atk_dmg = 0
 	atk_dmg = player_strength + atk_range
 	
 	# determing a hit or a miss
@@ -215,14 +217,15 @@ def attack_logic():
 		monster_health -= atk_dmg
 		# if more attack methods are added in future, need to make the following code a function
 		if monster_health <= 0:
-			# the first part of these calculations is to get the base rate so the player will always get a return
+			# calculate exp and gold so that the player always gets a return; this return increases with level
 			player_gold += ((player_strength / 5) + (dmg_received / 4))
 			player_exp += ((player_strength / 6) + (dmg_received / 3))
 			total_player_exp += player_exp
 			encounter_no += 1
 			print "Enemy %s was defeated!\n" % monster_type
 			print "Obtained %s gold and %s experience!\n" % (
-			(player_strength / 5) + (dmg_received / 6), (player_strength / 4) + (dmg_received / 3))
+			(player_strength / 5) + (dmg_received / 4), (player_strength / 6) + (dmg_received / 3))
+			
 			if drop == 1:
 				print "%s dropped a large potion\n" % monster_type
 				large_potions += 1
@@ -232,15 +235,19 @@ def attack_logic():
 			elif drop == 3:
 				print "%s dropped a potion!\n" % monster_type
 				potions += 1
+				
 			if player_exp >= level_target:
 				player_level += 1
 				player_exp = 0
 				player_strength += (6 + (player_level * 2))
 				player_vitality += (player_vitality / 10)
 				player_health += (player_vitality / 5)
+				
 				if player_health > player_vitality:
 					player_health = player_vitality
+					
 				level_target += (level_target / 2)
+				
 				print "You leveled up!\nLevel is now %s!" % player_level
 				print "Health is now %s!\nStrength is now %s!\n" % (player_vitality, player_strength)
 				# if this were part of a larger game, say an rpg, this is where you would exit battle processing
@@ -253,12 +260,14 @@ def attack_logic():
 	enemy_turn()
 	
 def enemy_turn():
-	global player_health, enemy_range, enemy_chance, dmg_received, is_defending
+	global player_health, dmg_received, is_defending
 	
 	# determine damage variance and attack chance
-	from random import randint
-	enemy_range = randint(4, enemy_atk_limit)
-	enemy_chance = randint(0, 10)
+	enemy_range = 0
+	enemy_chance = 0
+	
+	enemy_range = random.randrange(4, enemy_atk_limit, 2)
+	enemy_chance = random.randrange(0, 10, 2)
 	
 	# reduce enemy damage if player is defending
 	if is_defending == True:
@@ -287,12 +296,12 @@ def inventory():
 	global small_potions, potions, large_potions, player_health, player_gold, player_vitality
 
 	print """
-Inventory - Press 1, 2 or 3 to use, 4, 5 or 6 to buy, 7 to return
+Inventory - Press 1, 2 or 3 to use, 4, 5 or 6 to buy, 7 to return / Player Gold -> %s
 
-  1/4 -> %s small potions  << 100 gold >>  << +100HP >>
-  2/5 -> %s potions        << 250 gold >>  << +300HP >>
-  3/6 -> %s large potions  << 500 gold >>  << +700HP >>
-	""" % (small_potions, potions, large_potions)
+  1/4 -> %s small potions  << 300 gold >>  << +250HP >>
+  2/5 -> %s potions        << 600 gold >>  << +750HP >>
+  3/6 -> %s large potions  << 1000 gold >>  << +1500HP >>
+	""" % (player_gold, small_potions, potions, large_potions)
 	
 	try:
 		inv_input = int( raw_input('  -> '))
@@ -300,8 +309,8 @@ Inventory - Press 1, 2 or 3 to use, 4, 5 or 6 to buy, 7 to return
 		
 		if inv_input == 1:
 			if small_potions >= 1:
-				print "You drank a small potion, and recovered 100HP.\n"
-				player_health += 100
+				print "You drank a small potion, and recovered 250HP.\n"
+				player_health += 250
 				small_potions -= 1
 				
 				if player_health > player_vitality:
@@ -316,8 +325,8 @@ Inventory - Press 1, 2 or 3 to use, 4, 5 or 6 to buy, 7 to return
 				
 		if inv_input == 2:
 			if potions >= 1:
-				print "You drank a potion, and recovered 300HP.\n"
-				player_health += 300
+				print "You drank a potion, and recovered 750HP.\n"
+				player_health += 750
 				potions -= 1
 				
 				if player_health > player_vitality:
@@ -332,8 +341,8 @@ Inventory - Press 1, 2 or 3 to use, 4, 5 or 6 to buy, 7 to return
 				
 		if inv_input == 3:
 			if large_potions >= 1:
-				print "You drank a large potion, and recovered 700HP.\n"
-				player_health += 700
+				print "You drank a large potion, and recovered 1500HP.\n"
+				player_health += 1500
 				large_potions -= 1
 				
 				if player_health > player_vitality:
@@ -346,45 +355,44 @@ Inventory - Press 1, 2 or 3 to use, 4, 5 or 6 to buy, 7 to return
 				inventory()
 				
 		if inv_input == 4:
-			if player_gold >= 100:
+			if player_gold >= 300:
 				print "You bought a small potion.\n"
 				small_potions += 1
-				player_gold -= 100
+				player_gold -= 300
 				inventory()
 				
-			elif player_gold < 100:
+			elif player_gold < 300:
 				print "You don't have enough gold.\n"
 				inventory()
 				
 		if inv_input == 5:
-			if player_gold >= 250:
+			if player_gold >= 600:
 				print "You bought a potion.\n"
 				potions += 1
-				player_gold -= 250
+				player_gold -= 600
 				inventory()
 				
-			elif player_gold < 250:
+			elif player_gold < 600:
 				print "You don't have enough gold.\n"
 				inventory()
 				
 		if inv_input == 6:
-			if player_gold >= 500:
+			if player_gold >= 1000:
 				print "You bought a large potion.\n"
 				large_potions += 1
-				player_gold -= 500
+				player_gold -= 1000
 				inventory()
 				
-			elif player_gold < 500:
+			elif player_gold < 1000:
 				print "You don't have enough gold.\n"
 				inventory()
 				
 		if inv_input == 7:
 			menu_msg()
 			
-	except Exception, e:
-		print "Encountered an error: " + str(e)	
-	
-	enemy_turn()
+	except Exception:
+		# print "Encountered an error: " + str(e) - debugging
+		inventory()
 
 def game_over():
 	global encounter_no, player_health, is_defending
@@ -420,13 +428,14 @@ def game_over():
 			# exit game
 			sys.exit()
 			
-	except Exception, e:
-		print "Encountered an error: " + str(e)
+	except Exception:
+		# print "Encountered an error: " + str(e) - debugging
+		game_over()
 	
 def start():
 	print """
 +-----------------------+
-|   ARENA v1.2          |
+|   ARENA v1.3          |
 |   by                  |
 |   Christopher Reid    |
 +-----------------------+
@@ -436,14 +445,8 @@ There may be some bugs.
 
 All input is through the number keys.
 
-Handling for input other than the number
-keys is not implemented yet.
-
-Currently, pressing the Enter key will
-break the game.
-
 Enter 1 to continue.
-Any other number to quit.
+Any other key to quit.
 	"""
 	
 	try:
@@ -454,7 +457,8 @@ Any other number to quit.
 		elif t_in != 1:
 			sys.exit()
 			
-	except Exception, e:
-		print "Encountered an error: " + str(e)
+	except Exception:
+		# print "Encountered an error: " + str(e) - debugging
+		sys.exit()
 		
 start()
