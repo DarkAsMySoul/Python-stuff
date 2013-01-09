@@ -15,7 +15,7 @@ A simple battle arena game inspired by classic rpg's in a text-based format.
 I couldn't say that it was finished, and I want to add more to it in future.
 
 Changelog:
-Implemented measure to better catch errors, especially relating to input
+v1.3: Input no longer throws errors or breaks execution.
 
-Known bugs:
-Strong possibility of encountering a recursion error after encounter 90.
+v1.2: Implemented measure to better catch errors, especially relating to input.
+
