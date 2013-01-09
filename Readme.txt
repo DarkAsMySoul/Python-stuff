@@ -16,6 +16,9 @@ I couldn't say that it was finished, and I want to add more to it in future.
 
 Changelog:
 v1.3: Input no longer throws errors or breaks execution.
+      Reduced amount of global variables
+      Added spacing to increase readability
+      modified/added some comments
 
 v1.2: Implemented measure to better catch errors, especially relating to input.
 
